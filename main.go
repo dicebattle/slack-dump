@@ -39,7 +39,7 @@ func main() {
 	app.Author = "Joe Fitzgerald, Sunyong Lim"
 	app.Email = "jfitzgerald@pivotal.io, dicebattle@gmail.com"
 	app.Version = "0.0.2"
-	app.Action = func(c *cli.Context) {
+	app.Action = func(c *cli.Context) error {
 		token := c.String("token")
 		if token == "" {
 			fmt.Println("ERROR: the token flag is required...")
@@ -66,6 +66,8 @@ func main() {
 		dumpRooms(api, dir, rooms)
 
 		archive(dir)
+
+		return nil
 	}
 
 	app.Run(os.Args)
@@ -271,7 +273,14 @@ func fetchGroupHistory(api *slack.Client, ID string) []slack.Message {
 	history, err := api.GetGroupHistory(ID, historyParams)
 	check(err)
 	messages := history.Messages
-	latest := messages[len(messages)-1].Timestamp
+
+	messageCount := len(messages)
+
+	if messageCount == 0 {
+		return messages
+	}
+
+	latest := messages[messageCount - 1].Timestamp
 	for {
 		if history.HasMore != true {
 			break
