@@ -273,7 +273,14 @@ func fetchGroupHistory(api *slack.Client, ID string) []slack.Message {
 	history, err := api.GetGroupHistory(ID, historyParams)
 	check(err)
 	messages := history.Messages
-	latest := messages[len(messages)-1].Timestamp
+
+	messageCount := len(messages)
+
+	if messageCount == 0 {
+		return messages
+	}
+
+	latest := messages[messageCount - 1].Timestamp
 	for {
 		if history.HasMore != true {
 			break
